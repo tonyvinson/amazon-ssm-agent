@@ -1,7 +1,7 @@
 # github.com/Jeffail/gabs v1.0.0
 ## explicit
 github.com/Jeffail/gabs
-# github.com/Microsoft/go-winio v0.5.0
+# github.com/Microsoft/go-winio v0.5.2
 github.com/Microsoft/go-winio
 github.com/Microsoft/go-winio/pkg/guid
 # github.com/Workiva/go-datastructures v1.0.53
@@ -182,7 +182,7 @@ github.com/google/shlex
 # github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 ## explicit
 github.com/gorhill/cronexpr
-# github.com/gorilla/websocket v1.4.2
+# github.com/gorilla/websocket v1.5.0
 ## explicit
 github.com/gorilla/websocket
 # github.com/hectane/go-acl v0.0.0-20151103031024-7f56832555fc
@@ -230,7 +230,7 @@ github.com/xanzy/ssh-agent
 # github.com/xtaci/smux v1.5.15
 ## explicit
 github.com/xtaci/smux
-# go.nanomsg.org/mangos/v3 v3.3.0
+# go.nanomsg.org/mangos/v3 v3.4.2
 ## explicit
 go.nanomsg.org/mangos/v3
 go.nanomsg.org/mangos/v3/errors
