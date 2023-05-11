@@ -14,7 +14,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.0.2
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575
 	github.com/coreos/go-semver v0.2.0
-	github.com/creack/pty v1.1.11
+	github.com/creack/pty v1.1.18
 	github.com/digitalocean/go-smbios v0.0.0-20180907143718-390a4f403a8e
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-git/go-billy/v5 v5.3.0 // indirect
