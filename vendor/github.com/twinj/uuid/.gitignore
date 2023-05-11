@@ -1,1 +1,6 @@
-uuid
+*.iml
+/savers/*generator-*
+/savers/generator-*
+/vendor/
+*.out
+cover*.html

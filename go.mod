@@ -26,10 +26,11 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/hectane/go-acl v0.0.0-20151103031024-7f56832555fc // Don't update -- breaks
 	github.com/mitchellh/go-ps v1.0.0
+	github.com/myesui/uuid v1.0.0 // indirect
 	github.com/nightlyone/lockfile v0.0.0
 	github.com/pborman/ansi v1.0.0
-	github.com/stretchr/testify v1.7.0
-	github.com/twinj/uuid v0.0.0-20151029044442-89173bcdda19 // Don't update -- breaks
+	github.com/stretchr/testify v1.8.2
+	github.com/twinj/uuid v1.0.0 // Don't update -- breaks
 	github.com/xtaci/smux v1.5.15
 	go.nanomsg.org/mangos/v3 v3.3.0
 	golang.org/x/crypto v0.9.0
@@ -38,6 +39,6 @@ require (
 	golang.org/x/sync v0.1.0
 	golang.org/x/sys v0.8.0
 	gopkg.in/ini.v1 v1.67.0
+	gopkg.in/stretchr/testify.v1 v1.2.2 // indirect
 	gopkg.in/yaml.v2 v2.3.0
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
