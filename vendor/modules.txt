@@ -202,6 +202,8 @@ github.com/mitchellh/go-homedir
 # github.com/mitchellh/go-ps v1.0.0
 ## explicit
 github.com/mitchellh/go-ps
+# github.com/myesui/uuid v1.0.0
+## explicit
 # github.com/nightlyone/lockfile v0.0.0 => ./extra/lockfile
 ## explicit
 github.com/nightlyone/lockfile
@@ -212,15 +214,15 @@ github.com/pborman/ansi
 github.com/pmezard/go-difflib/difflib
 # github.com/sergi/go-diff v1.1.0
 github.com/sergi/go-diff/diffmatchpatch
-# github.com/stretchr/objx v0.1.1
+# github.com/stretchr/objx v0.5.0
 github.com/stretchr/objx
-# github.com/stretchr/testify v1.7.0
+# github.com/stretchr/testify v1.8.2
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/mock
 github.com/stretchr/testify/require
 github.com/stretchr/testify/suite
-# github.com/twinj/uuid v0.0.0-20151029044442-89173bcdda19
+# github.com/twinj/uuid v1.0.0
 ## explicit
 github.com/twinj/uuid
 # github.com/xanzy/ssh-agent v0.3.0
@@ -321,13 +323,14 @@ google.golang.org/protobuf/runtime/protoimpl
 # gopkg.in/ini.v1 v1.67.0
 ## explicit
 gopkg.in/ini.v1
+# gopkg.in/stretchr/testify.v1 v1.2.2
+## explicit
 # gopkg.in/warnings.v0 v0.1.2
 gopkg.in/warnings.v0
 # gopkg.in/yaml.v2 v2.3.0
 ## explicit
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.1
-## explicit
 gopkg.in/yaml.v3
 # github.com/aws/aws-sdk-go => ./extra/aws-sdk-go
 # github.com/nightlyone/lockfile => ./extra/lockfile
