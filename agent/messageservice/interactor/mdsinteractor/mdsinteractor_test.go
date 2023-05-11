@@ -17,6 +17,7 @@ package mdsinteractor
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -65,11 +66,13 @@ func (suite *MDSInteractorTestSuite) SetupTest() {
 	newMdsService = func(context context.T) mdsService.Service {
 		return mdsMock
 	}
+	var ableToOpenMGSConnection uint32
 	interactor := &MDSInteractor{
-		context:              contextMock,
-		service:              mdsMock,
-		messagePollWaitGroup: &sync.WaitGroup{},
-		processorStopPolicy:  sdkutil.NewStopPolicy(Name, testStopPolicyThreshold),
+		context:                 contextMock,
+		service:                 mdsMock,
+		messagePollWaitGroup:    &sync.WaitGroup{},
+		processorStopPolicy:     sdkutil.NewStopPolicy(Name, testStopPolicyThreshold),
+		ableToOpenMGSConnection: &ableToOpenMGSConnection,
 	}
 
 	suite.contextMock = contextMock
@@ -86,12 +89,57 @@ func (suite *MDSInteractorTestSuite) TestMDSInteractor_Initialize() {
 
 	mdsInteractor := suite.mdsInteractor
 	mdsInteractor.replyChan = make(chan contracts.DocumentResult, 1)
-	err := mdsInteractor.Initialize()
+	var ableToOpenMGSConnection uint32
+	err := mdsInteractor.Initialize(&ableToOpenMGSConnection)
 
 	assert.NoError(suite.T(), err)
 	// message polling should not be loaded during this time
 	assert.Nil(suite.T(), mdsInteractor.messagePollJob)
 	assert.NotNil(suite.T(), mdsInteractor.sendReplyJob)
+	assert.False(suite.T(), atomic.LoadUint32(mdsInteractor.ableToOpenMGSConnection) != 0)
+	close(mdsInteractor.replyChan)
+	close(incomingChan)
+}
+
+func (suite *MDSInteractorTestSuite) TestMDSInteractor_InitializeHandlesNilAbleToOpenMGSConnection() {
+	contextMock := suite.contextMock
+	incomingChan := make(chan contracts.DocumentState)
+	mdsServiceMock := suite.mdsMock
+	mdsServiceMock.On("GetMessages", contextMock.Log(), mock.AnythingOfType("string")).Return(&ssmmds.GetMessagesOutput{}, nil)
+	mdsServiceMock.On("LoadFailedReplies", contextMock.Log()).Return([]string{})
+
+	mdsInteractor := suite.mdsInteractor
+	mdsInteractor.replyChan = make(chan contracts.DocumentResult, 1)
+	var ableToOpenMGSConnection *uint32 = nil
+	err := mdsInteractor.Initialize(ableToOpenMGSConnection)
+
+	assert.NoError(suite.T(), err)
+	// message polling should not be loaded during this time
+	assert.Nil(suite.T(), mdsInteractor.messagePollJob)
+	assert.NotNil(suite.T(), mdsInteractor.sendReplyJob)
+	assert.Nil(suite.T(), mdsInteractor.ableToOpenMGSConnection)
+	close(mdsInteractor.replyChan)
+	close(incomingChan)
+}
+
+func (suite *MDSInteractorTestSuite) TestMDSInteractor_PicksUpMGSStatusUpdate() {
+	contextMock := suite.contextMock
+	incomingChan := make(chan contracts.DocumentState)
+	mdsServiceMock := suite.mdsMock
+	mdsServiceMock.On("GetMessages", contextMock.Log(), mock.AnythingOfType("string")).Return(&ssmmds.GetMessagesOutput{}, nil)
+	mdsServiceMock.On("LoadFailedReplies", contextMock.Log()).Return([]string{})
+
+	mdsInteractor := suite.mdsInteractor
+	mdsInteractor.replyChan = make(chan contracts.DocumentResult, 1)
+	var ableToOpenMGSConnection uint32
+	err := mdsInteractor.Initialize(&ableToOpenMGSConnection)
+
+	assert.NoError(suite.T(), err)
+	assert.False(suite.T(), atomic.LoadUint32(mdsInteractor.ableToOpenMGSConnection) != 0)
+
+	atomic.StoreUint32(&ableToOpenMGSConnection, 1)
+	assert.True(suite.T(), atomic.LoadUint32(mdsInteractor.ableToOpenMGSConnection) != 0)
+
 	close(mdsInteractor.replyChan)
 	close(incomingChan)
 }
@@ -122,6 +170,46 @@ func (suite *MDSInteractorTestSuite) TestMDSInteractor_ListenReply() {
 	mdsInteractor.listenReply()
 	mdsServiceMock.AssertNumberOfCalls(suite.T(), "SendReply", 1)
 	mdsServiceMock.AssertCalled(suite.T(), "SendReply", contextMock.Log(), result.MessageID, mock.AnythingOfType("string"))
+}
+
+func (suite *MDSInteractorTestSuite) TestMDSInteractor_ListenReplyHandlesNilAbleToOpenMGSConnection() {
+	contextMock := suite.contextMock
+	mdsInteractor := suite.mdsInteractor
+	mdsInteractor.ableToOpenMGSConnection = nil
+	mdsInteractor.replyChan = make(chan contracts.DocumentResult, 1)
+	mdsServiceMock := suite.mdsMock
+	mdsServiceMock.On("SendReply", contextMock.Log(), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(nil)
+
+	pluginRes := contracts.PluginResult{
+		PluginID:   "aws:runScript",
+		PluginName: "aws:runScript",
+		Status:     contracts.ResultStatusSuccess,
+		Code:       0,
+	}
+	pluginResults := make(map[string]*contracts.PluginResult)
+	pluginResults[pluginRes.PluginID] = &pluginRes
+	result := contracts.DocumentResult{
+		MessageID:     "1234",
+		PluginResults: pluginResults,
+		Status:        contracts.ResultStatusSuccess,
+		LastPlugin:    "",
+	}
+	mdsInteractor.replyChan <- result
+	close(mdsInteractor.replyChan)
+	mdsInteractor.listenReply()
+	mdsServiceMock.AssertNumberOfCalls(suite.T(), "SendReply", 1)
+	mdsServiceMock.AssertCalled(suite.T(), "SendReply", contextMock.Log(), result.MessageID, mock.AnythingOfType("string"))
+}
+
+func (suite *MDSInteractorTestSuite) TestMDSInteractor_sendDocLevelResponseHandlesNilAbleToOpenMGSConnection() {
+	contextMock := suite.contextMock
+	mdsInteractor := suite.mdsInteractor
+	mdsInteractor.ableToOpenMGSConnection = nil
+	mdsServiceMock := suite.mdsMock
+	messageId := "1234"
+	mdsServiceMock.On("SendReply", contextMock.Log(), mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return(nil)
+	mdsInteractor.sendDocLevelResponse(messageId, contracts.ResultStatusSuccess, "")
+	mdsServiceMock.AssertCalled(suite.T(), "SendReply", contextMock.Log(), messageId, mock.AnythingOfType("string"))
 }
 
 func (suite *MDSInteractorTestSuite) TestMDSInteractor_sendFailedReplies() {

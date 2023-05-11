@@ -425,7 +425,6 @@ func TestDetermineTarget_TargetVersionNone_FailedGetLatest(t *testing.T) {
 	// setup
 	var logger = logmocks.NewMockLog()
 	updater := createDefaultUpdaterStub()
-
 	updateDetail := createUpdateDetail(Initialized)
 	updateDetail.TargetVersion = "None"
 
@@ -533,6 +532,145 @@ func TestDetermineTarget_TargetVersionLatest_Success(t *testing.T) {
 	assert.Equal(t, contracts.ResultStatusInProgress, updateDetail.Result)
 	assert.True(t, updateconstants.TargetVersionLatest == updateDetail.TargetResolver)
 	assert.Equal(t, "5.6.5.0", updateDetail.TargetVersion)
+
+	assert.Equal(t, "", updateDetail.StandardOut)
+	assert.Equal(t, "", updateDetail.StandardError)
+}
+
+func TestDetermineTarget_TargetVersionStable_FailedGetStableURL(t *testing.T) {
+	// setup
+	var logger = logmocks.NewMockLog()
+	updater := createDefaultUpdaterStub()
+
+	updateDetail := createUpdateDetail(Initialized)
+	updateDetail.TargetVersion = "stable"
+	updateDetail.ManifestURL = "someInvalidManifestUrl"
+
+	finalizeCalled := false
+	updater.mgr.finalize = func(mgr *updateManager, updateDetail *UpdateDetail, code string) (err error) {
+		finalizeCalled = true
+		return nil
+	}
+
+	called := false
+	updater.mgr.validateUpdateParam = func(mgr *updateManager, log log.T, updateDetail *UpdateDetail) (err error) {
+		called = true
+		return nil
+	}
+
+	// action
+	err := determineTarget(updater.mgr, logger, updateDetail)
+
+	// assert
+	assert.NoError(t, err)
+	assert.False(t, called)
+	assert.True(t, finalizeCalled)
+	assert.Equal(t, Completed, updateDetail.State)
+	assert.Equal(t, contracts.ResultStatusFailed, updateDetail.Result)
+
+	assert.Contains(t, updateDetail.StandardOut, "Failed to generate stable version from manifest url: ")
+	assert.Equal(t, "", updateDetail.StandardError)
+
+	finalizeCalled = false
+	tempCode := ""
+	updater.mgr.finalize = func(mgr *updateManager, updateDetail *UpdateDetail, code string) (err error) {
+		tempCode = code
+		finalizeCalled = true
+		return nil
+	}
+	getStableManifestURL = func(manifestURL string) (string, error) {
+		return "", fmt.Errorf("err1")
+	}
+	finalizeCalled = false
+	// action
+	err = determineTarget(updater.mgr, logger, updateDetail)
+	// assert
+	assert.NoError(t, err)
+	assert.True(t, finalizeCalled)
+	assert.Contains(t, tempCode, string(updateconstants.ErrorGetStableVersionS3))
+	assert.True(t, updateconstants.TargetVersionStable == updateDetail.TargetResolver)
+
+	getStableManifestURL = updateutil.GetManifestURLFromSourceUrl
+
+}
+
+func TestDetermineTarget_TargetVersionStable_FailedGetStableVersion(t *testing.T) {
+	// setup
+	var logger = logmocks.NewMockLog()
+	updater := createDefaultUpdaterStub()
+	getStableManifestURL = updateutil.GetStableURLFromManifestURL
+
+	updateDetail := createUpdateDetail(Initialized)
+	updateDetail.TargetVersion = "stable"
+	updateDetail.ManifestURL = "https://some.bucket.url/ssm-agent-manifest.json"
+
+	s3Util := &updates3utilmocks.T{}
+	s3Util.On("GetStableVersion", "https://some.bucket.url/stable/VERSION", mock.Anything).Return("", fmt.Errorf("SomeGetStableVersionError"))
+	updater.mgr.S3util = s3Util
+
+	finalizeCalled := false
+	updater.mgr.finalize = func(mgr *updateManager, updateDetail *UpdateDetail, code string) (err error) {
+		finalizeCalled = true
+		return nil
+	}
+
+	called := false
+	updater.mgr.validateUpdateParam = func(mgr *updateManager, log log.T, updateDetail *UpdateDetail) (err error) {
+		called = true
+		return nil
+	}
+
+	// action
+	err := determineTarget(updater.mgr, logger, updateDetail)
+
+	// assert
+	assert.NoError(t, err)
+	assert.False(t, called)
+	assert.True(t, finalizeCalled)
+	assert.Equal(t, Completed, updateDetail.State)
+	assert.Equal(t, contracts.ResultStatusFailed, updateDetail.Result)
+
+	assert.Contains(t, updateDetail.StandardOut, "Failed to get stable version form s3: SomeGetStableVersionError")
+	assert.Equal(t, "", updateDetail.StandardError)
+}
+
+func TestDetermineTarget_TargetVersionStable_Success(t *testing.T) {
+	// setup
+
+	var logger = logmocks.NewMockLog()
+	updater := createDefaultUpdaterStub()
+
+	updateDetail := createUpdateDetail(Initialized)
+	updateDetail.TargetVersion = "stable"
+	updateDetail.ManifestURL = "https://some.bucket.url/ssm-agent-manifest.json"
+
+	s3Util := &updates3utilmocks.T{}
+	s3Util.On("GetStableVersion", "https://some.bucket.url/stable/VERSION", mock.Anything).Return("3.1.1188.0", nil)
+	updater.mgr.S3util = s3Util
+
+	finalizeCalled := false
+	updater.mgr.finalize = func(mgr *updateManager, updateDetail *UpdateDetail, code string) (err error) {
+		finalizeCalled = true
+		return nil
+	}
+
+	called := false
+	updater.mgr.validateUpdateParam = func(mgr *updateManager, log log.T, updateDetail *UpdateDetail) (err error) {
+		called = true
+		return nil
+	}
+
+	// action
+	err := determineTarget(updater.mgr, logger, updateDetail)
+
+	// assert
+	assert.NoError(t, err)
+	assert.True(t, called)
+	assert.False(t, finalizeCalled)
+	assert.Equal(t, Initialized, updateDetail.State)
+	assert.Equal(t, contracts.ResultStatusInProgress, updateDetail.Result)
+	assert.True(t, updateconstants.TargetVersionStable == updateDetail.TargetResolver)
+	assert.Equal(t, "3.1.1188.0", updateDetail.TargetVersion)
 
 	assert.Equal(t, "", updateDetail.StandardOut)
 	assert.Equal(t, "", updateDetail.StandardError)
