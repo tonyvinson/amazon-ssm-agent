@@ -33,10 +33,10 @@ require (
 	github.com/twinj/uuid v0.0.0-20151029044442-89173bcdda19 // Don't update -- breaks
 	github.com/xtaci/smux v1.5.15
 	go.nanomsg.org/mangos/v3 v3.3.0
-	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
+	golang.org/x/crypto v0.1.0
+	golang.org/x/net v0.1.0
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 	golang.org/x/sys v0.1.0
 	gopkg.in/ini.v1 v1.62.0
 	gopkg.in/yaml.v2 v2.3.0
