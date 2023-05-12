@@ -13,7 +13,7 @@ require (
 	github.com/carlescere/scheduler v0.0.0-20150615230211-9b78eac89dfb
 	github.com/cenkalti/backoff/v4 v4.0.2
 	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575
-	github.com/coreos/go-semver v0.2.0
+	github.com/coreos/go-semver v0.3.1
 	github.com/creack/pty v1.1.18
 	github.com/digitalocean/go-smbios v0.0.0-20180907143718-390a4f403a8e
 	github.com/fsnotify/fsnotify v1.5.1
