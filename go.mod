@@ -40,5 +40,5 @@ require (
 	golang.org/x/sys v0.8.0
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/stretchr/testify.v1 v1.2.2 // indirect
-	gopkg.in/yaml.v2 v2.3.0
+	gopkg.in/yaml.v2 v2.4.0
 )
