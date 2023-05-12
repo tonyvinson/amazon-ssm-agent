@@ -19,7 +19,7 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/go-git/go-billy/v5 v5.3.0 // indirect
 	github.com/go-git/go-git/v5 v5.3.0
-	github.com/google/go-github v0.0.0-20170604025028-a117bb2595a5 // this corresponds to v8
+	github.com/google/go-github v17.0.0+incompatible // this corresponds to v8
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75

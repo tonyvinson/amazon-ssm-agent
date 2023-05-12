@@ -30,6 +30,13 @@ The services of a client divide the API into logical chunks and correspond to
 the structure of the GitHub API documentation at
 https://developer.github.com/v3/.
 
+NOTE: Using the https://godoc.org/context package, one can easily
+pass cancelation signals and deadlines to various services of the client for
+handling a request. In case there is no context available, then context.Background()
+can be used as a starting point.
+
+For more sample code snippets, head over to the https://github.com/google/go-github/tree/master/example directory.
+
 Authentication
 
 The go-github library does not directly handle authentication. Instead, when
@@ -63,13 +70,33 @@ See the oauth2 docs for complete instructions on using that library.
 For API methods that require HTTP Basic Authentication, use the
 BasicAuthTransport.
 
+GitHub Apps authentication can be provided by the
+https://github.com/bradleyfalzon/ghinstallation package.
+
+	import "github.com/bradleyfalzon/ghinstallation"
+
+	func main() {
+		// Wrap the shared transport for use with the integration ID 1 authenticating with installation ID 99.
+		itr, err := ghinstallation.NewKeyFromFile(http.DefaultTransport, 1, 99, "2016-10-19.private-key.pem")
+		if err != nil {
+			// Handle error.
+		}
+
+		// Use installation transport with client
+		client := github.NewClient(&http.Client{Transport: itr})
+
+		// Use client...
+	}
+
 Rate Limiting
 
 GitHub imposes a rate limit on all API clients. Unauthenticated clients are
 limited to 60 requests per hour, while authenticated clients can make up to
-5,000 requests per hour. To receive the higher rate limit when making calls
-that are not issued on behalf of a user, use the
-UnauthenticatedRateLimitedTransport.
+5,000 requests per hour. The Search API has a custom rate limit. Unauthenticated
+clients are limited to 10 requests per minute, while authenticated clients
+can make up to 30 requests per minute. To receive the higher rate limit when
+making calls that are not issued on behalf of a user,
+use UnauthenticatedRateLimitedTransport.
 
 The returned Response.Rate value contains the rate limit information
 from the most recent API call. If a recent enough response isn't
@@ -155,17 +182,6 @@ github.Response struct.
 		}
 		opt.Page = resp.NextPage
 	}
-
-Google App Engine
-
-Go on App Engine Classic (which as of this writing uses Go 1.6) can not use
-the "context" import and still relies on "golang.org/x/net/context".
-As a result, if you wish to continue to use "go-github" on App Engine Classic,
-you will need to rewrite all the "context" imports using the following command:
-
-    gofmt -w -r '"context" -> "golang.org/x/net/context"' *.go
-
-See "with_appengine.go" for more details.
 
 */
 package github
