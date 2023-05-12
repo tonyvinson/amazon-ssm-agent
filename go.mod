@@ -36,7 +36,7 @@ require (
 	golang.org/x/crypto v0.9.0
 	golang.org/x/net v0.10.0
 	golang.org/x/oauth2 v0.8.0
-	golang.org/x/sync v0.1.0
+	golang.org/x/sync v0.2.0
 	golang.org/x/sys v0.8.0
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/stretchr/testify.v1 v1.2.2 // indirect
